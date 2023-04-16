@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>100 Stars with Three.js</title>
+    <style>
+      body { margin: 0; }
+      canvas { display: block; }
+    </style>
+  </head>
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script >
+  
+      
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize( window.innerWidth, window.innerHeight );
+      document.body.appendChild( renderer.domElement );
+
+      // Tạo 100 ngôi sao đơn giản 3D
+      const starGeometry = new THREE.SphereGeometry( 0.2, 32, 32 );
+    //   const starMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+      const stars = [];
+    const textmeshs=[];
+       // Tạo chữ
+       const loader = new THREE.FontLoader();
+
+          loader.load('https://cdn.rawgit.com/mrdoob/three.js/dev/examples/fonts/gentilis_regular.typeface.json', function(font) {
+
+              const textGeometry = new THREE.TextGeometry('Happy Birth Day!', {
+                  font: font,
+                  size: 1,
+                  height: 0.1,
+                  curveSegments: 12,
+                  bevelEnabled: true,
+                  bevelThickness: 0.03,
+                  bevelSize: 0.02,
+                  bevelOffset: 0,
+                  bevelSegments: 5
+              } );
+
+              const textMaterial = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
+
+              const textMesh = new THREE.Mesh( textGeometry, textMaterial );
+              textMesh.position.x=-5;
+              textMesh.position.y=0;
+              textMesh.position.z=-100;
+              textmeshs.push(textMesh);
+              scene.add( textMesh );
+
+          } );
+
+          // Tạo nguồn sáng
+          const light = new THREE.PointLight( 0xffffff, 1, 100 );
+          light.position.set( 0, 0, 10 );
+          scene.add( light );
+
+      for ( let i = 0; i < 10000; i ++ ) {
+        var r = Math.random(); // giá trị R ngẫu nhiên
+        var g = Math.random(); // giá trị G ngẫu nhiên
+        var b = Math.random(); // giá trị B ngẫu nhiên
+        var starMaterial = new THREE.MeshBasicMaterial({ color: new THREE.Color(r, g, b) });
+        const star = new THREE.Mesh( starGeometry, starMaterial );
+        star.position.x = Math.random() * 200 - 100;
+        star.position.y = Math.random() * 200 - 100;
+        star.position.z = Math.random() * 200 - 100;
+
+        stars.push( star );
+        scene.add( star );
+       
+
+      }
+
+      // Di chuyển camera
+      camera.position.z = 10;
+
+      // Cập nhật vị trí của các ngôi sao trong mỗi khung hình
+      function update() {
+        const time = performance.now() * 0.001;
+        const speed = 0.2;
+       
+        for ( let i = 0; i < stars.length; i ++ ) {
+          const star = stars[i];
+          
+          // star.position.x = Math.sin( time * speed + i ) * 50;
+          // star.position.y = Math.cos( time * speed + i ) * 50;
+          star.position.z += 0.5; // tịnh tiến ngôi sao theo hướng z với vận tốc là 1 đơn vị/giây
+          
+          if (star.position.z > 100) {
+            star.position.z = -100;
+        }
+        }
+          for ( let i = 0; i < textmeshs.length; i ++ ) {
+            const txt = textmeshs[i];        
+            txt.position.z += 0.5; // tịnh tiến ngôi sao theo hướng z với vận tốc là 1 đơn vị/giây
+            
+            if (txt.position.z > 0) {
+              txt.position.z = 0;
+          }}
+        
+      }
+      let isDragging = false;
+      let previousMousePosition = {
+        x: 0,
+        y: 0
+      };
+
+      function onMouseMove(event) {
+      if (isDragging) {
+        const deltaX = event.clientX - previousMousePosition.x;
+        const deltaY = event.clientY - previousMousePosition.y;
+
+        camera.rotation.y += deltaX * 0.005;
+        camera.rotation.x += deltaY * 0.005;
+      }
+
+      previousMousePosition = {
+        x: event.clientX,
+        y: event.clientY
+      };
+      }
+
+      function onMouseDown(event) {
+        isDragging = true;
+      }
+
+      function onMouseUp(event) {
+        isDragging = false;
+      }
+      window.addEventListener('wheel', onDocumentWheel);
+
+    function onDocumentWheel(event) {
+      // Thay đổi giá trị z của camera
+      camera.position.z += event.deltaY * 0.1;
+    }
+    window.addEventListener('mousemove', onMouseMove, false);
+    window.addEventListener('mousedown', onMouseDown, false);
+    window.addEventListener('mouseup', onMouseUp, false);
+    
+   
+    
+      // Render scene và cập nhật vị trí của các ngôi sao
+      function animate() {
+        requestAnimationFrame( animate );
+      
+        update();
+        renderer.render( scene, camera );
+      }
+      animate();
+    
+    </script>
+  </body>
+</html>
